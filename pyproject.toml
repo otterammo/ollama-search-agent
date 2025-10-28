@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_backend"
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "ollama-search"
@@ -10,18 +10,26 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "ollama>=0.4.0",
+    "mcp>=1.0.0",
 ]
+
+[project.scripts]
+ollama-mcp-server = "src.mcp_server:main"
+
+[tool.setuptools]
+packages = ["src"]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+    "pytest-asyncio>=0.21.0",
     "mypy>=1.0.0",
     "ruff>=0.1.0",
 ]
 
 [tool.ruff]
-line-length = 88
+line-length = 100
 target-version = "py310"
 
 [tool.ruff.lint]
@@ -32,10 +40,17 @@ python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
+namespace_packages = true
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = "src.*"
+ignore_missing_imports = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+asyncio_mode = "auto"
 addopts = "-v --cov=src --cov-report=html --cov-report=term"

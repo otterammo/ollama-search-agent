@@ -1,0 +1,12 @@
+{
+  "mcp.servers": {
+    "ollama-search": {
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/src/mcp_server.py"
+      ],
+      "env": {},
+      "description": "Ollama web search and fetch capabilities via MCP"
+    }
+  }
+}

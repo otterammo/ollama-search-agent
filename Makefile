@@ -1,4 +1,4 @@
-.PHONY: help install test lint type-check format clean run
+.PHONY: help install test lint type-check format clean run run-mcp
 
 help:
 	@echo "Available targets:"
@@ -9,6 +9,7 @@ help:
 	@echo "  format       - Format code with ruff"
 	@echo "  clean        - Remove build artifacts and cache"
 	@echo "  run          - Run the search agent interactively"
+	@echo "  run-mcp      - Run the MCP server"
 
 install:
 	pip3 install -r requirements.txt
@@ -23,7 +24,7 @@ lint:
 	ruff check src/ tests/
 
 type-check:
-	mypy src/
+	MYPYPATH=. mypy src/
 
 format:
 	ruff format src/ tests/
@@ -36,4 +37,7 @@ clean:
 	find . -type f -name "*.coverage" -delete
 
 run:
-	python3 -m src.main --interactive
+	cd src && python3 main.py --interactive
+
+run-mcp:
+	python3 src/mcp_server.py

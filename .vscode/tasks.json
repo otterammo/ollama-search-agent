@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Ollama MCP Server",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/src/mcp_server.py"
+      ],
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Test MCP Server",
+      "type": "shell",
+      "command": "python3",
+      "args": [
+        "${workspaceFolder}/tests/test_mcp_manual.py"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Run Search Agent (Interactive)",
+      "type": "shell",
+      "command": "cd ${workspaceFolder}/src && python3 main.py --interactive",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      }
+    }
+  ]
+}

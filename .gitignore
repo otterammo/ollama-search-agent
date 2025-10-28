@@ -30,8 +30,15 @@ htmlcov/
 env/
 venv/
 
-.vscode/
 .idea/
 *.swp
 *.swo
 *~
+
+# Keep VS Code folder but ignore some files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.vscode/settings.workspace.json
