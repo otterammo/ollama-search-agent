@@ -4,8 +4,25 @@ A search agent using Ollama's web search API for reading and understanding onlin
 
 ## Installation
 
+### Local Installation
+
 ```bash
 pip3 install -r requirements.txt
+```
+
+### Docker Installation
+
+See [docs/DOCKER.md](docs/DOCKER.md) for comprehensive Docker setup instructions.
+
+Quick start with Docker:
+```bash
+make docker-build
+make docker-run
+```
+
+Or using Docker Compose:
+```bash
+make docker-up
 ```
 
 ## Usage
@@ -62,6 +79,8 @@ python3 src/mcp_server.py
 
 #### Claude Desktop
 
+**Local Installation:**
+
 Add to your MCP client configuration (e.g., Claude Desktop's config):
 
 ```json
@@ -75,9 +94,32 @@ Add to your MCP client configuration (e.g., Claude Desktop's config):
 }
 ```
 
+**Docker Installation:**
+
+```json
+{
+  "mcpServers": {
+    "ollama-search": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "OLLAMA_HOST=http://host.docker.internal:11434",
+        "--add-host=host.docker.internal:host-gateway",
+        "ollama-mcp-server"
+      ]
+    }
+  }
+}
+```
+
 #### VS Code
 
 See [VSCODE_SETUP.md](VSCODE_SETUP.md) for detailed VS Code integration.
+
+**Local Installation:**
 
 Quick setup - add to VS Code settings.json:
 ```json
@@ -86,6 +128,27 @@ Quick setup - add to VS Code settings.json:
     "ollama-search": {
       "command": "python3",
       "args": ["${workspaceFolder}/src/mcp_server.py"]
+    }
+  }
+}
+```
+
+**Docker Installation:**
+
+```json
+{
+  "mcp.servers": {
+    "ollama-search": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "OLLAMA_HOST=http://host.docker.internal:11434",
+        "--add-host=host.docker.internal:host-gateway",
+        "ollama-mcp-server"
+      ]
     }
   }
 }

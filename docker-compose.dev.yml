@@ -1,0 +1,8 @@
+services:
+  ollama-mcp-server:
+    volumes:
+      - ./src:/app/src:rw
+      - ./tests:/app/tests:ro
+    environment:
+      - DEBUG=1
+    command: ["sh", "-c", "pip3 install -e . && ollama-mcp-server"]

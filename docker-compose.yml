@@ -1,0 +1,22 @@
+services:
+  ollama-mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ollama-mcp-server
+    environment:
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./src:/app/src:ro
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - ollama-network
+
+networks:
+  ollama-network:
+    driver: bridge
