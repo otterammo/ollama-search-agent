@@ -2,18 +2,54 @@
 
 ## Overview
 
-VS Code can connect to MCP servers through the GitHub Copilot extension (with MCP support) or other MCP-compatible VS Code extensions.
+VS Code can connect to MCP servers through the GitHub Copilot extension (with MCP support) or other MCP-compatible VS Code extensions. This guide shows how to integrate the Ollama Search MCP server running in Docker with VS Code.
+
+## Prerequisites
+
+- Docker and Docker Compose installed
+- Ollama running on your host machine
+- VS Code with GitHub Copilot extension (or other MCP-compatible extension)
+- MCP server Docker image built (`make docker-build`)
 
 ## Setup for VS Code
 
-### Option 1: Using VS Code Settings (Recommended)
+### Option 1: Using Docker (Recommended)
 
-1. Open VS Code settings (JSON):
+1. Build the Docker image:
+   ```bash
+   make docker-build
+   ```
+
+2. Open VS Code settings (JSON):
    - Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows/Linux)
    - Type "Preferences: Open User Settings (JSON)"
    - Press Enter
 
-2. Add the MCP server configuration:
+3. Add the MCP server configuration:
+
+```json
+{
+  "mcp.servers": {
+    "ollama-search": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "OLLAMA_HOST=http://host.docker.internal:11434",
+        "--add-host=host.docker.internal:host-gateway",
+        "ollama-mcp-server"
+      ],
+      "description": "Ollama web search and fetch capabilities"
+    }
+  }
+}
+```
+
+### Option 2: Using Python Directly (Development)
+
+For local development without Docker:
 
 ```json
 {
@@ -24,13 +60,12 @@ VS Code can connect to MCP servers through the GitHub Copilot extension (with MC
         "/absolute/path/to/ollama-search/src/mcp_server.py"
       ],
       "env": {},
-      "description": "Ollama web search and fetch capabilities"
+      "description": "Ollama web search and fetch capabilities (local dev)"
     }
   }
 }
 ```
-
-### Option 2: Workspace Settings
+### Option 3: Workspace Settings (Docker)
 
 For project-specific configuration, create `.vscode/settings.json` in your workspace:
 
@@ -38,38 +73,42 @@ For project-specific configuration, create `.vscode/settings.json` in your works
 {
   "mcp.servers": {
     "ollama-search": {
-      "command": "python3",
+      "command": "docker",
       "args": [
-        "${workspaceFolder}/../ollama-search/src/mcp_server.py"
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "OLLAMA_HOST=http://host.docker.internal:11434",
+        "--add-host=host.docker.internal:host-gateway",
+        "ollama-mcp-server"
       ],
-      "description": "Ollama search agent for documentation"
+      "description": "Ollama search agent (Docker)"
     }
   }
 }
 ```
 
-### Option 3: GitHub Copilot with MCP
-
-If using GitHub Copilot with MCP support:
-
-1. Install GitHub Copilot extension (if not already installed)
-2. Check if MCP support is available in your Copilot version
-3. Configure in Copilot settings or use the VS Code settings above
-
 ## Testing the Integration
 
-1. **Verify the server starts:**
+1. **Verify the Docker image exists:**
    ```bash
-   python3 /absolute/path/to/ollama-search/src/mcp_server.py
+   docker images | grep ollama-mcp-server
+   ```
+   If not found, build it: `make docker-build`
+
+2. **Test the server manually:**
+   ```bash
+   make docker-run
    ```
    Press `Ctrl+C` to stop.
 
-2. **Check VS Code output:**
+3. **Check VS Code output:**
    - Open Output panel: `View > Output`
    - Select "MCP" or "Copilot" from the dropdown
    - Look for connection messages
 
-3. **Test tool availability:**
+4. **Test tool availability:**
    - Open Copilot chat
    - The MCP tools should be available automatically
    - Try: "Use the ollama search to find information about Python async"
@@ -106,52 +145,89 @@ AI-powered search that combines search and fetch.
 
 ### Server not connecting
 
-1. **Check Python path:**
+1. **Check Docker image:**
    ```bash
-   which python3
+   docker images | grep ollama-mcp-server
    ```
-   Update the `command` in settings if different.
+   If missing, build it: `make docker-build`
 
-2. **Verify dependencies:**
+2. **Verify Docker is running:**
+   ```bash
+   docker ps
+   ```
+
+3. **Check Ollama is running:**
+   ```bash
+   curl http://localhost:11434/api/version
+   ```
+
+4. **Test Docker connectivity to Ollama:**
+   ```bash
+   docker run --rm --add-host=host.docker.internal:host-gateway \
+     curlimages/curl http://host.docker.internal:11434/api/version
+   ```
+
+5. **For Python direct mode, check dependencies:**
    ```bash
    cd /path/to/ollama-search
    pip3 list | grep -E "ollama|mcp"
    ```
 
-3. **Check Ollama is running:**
-   ```bash
-   ollama list
-   ```
-
-4. **Test server manually:**
-   ```bash
-   cd /path/to/ollama-search
-   python3 src/mcp_server.py
-   ```
-
 ### Tools not appearing
 
 1. Restart VS Code after configuration changes
-2. Check VS Code Developer Tools:
+2. Verify MCP settings key is `"mcp.servers"` (not `"servers"`)
+3. Check Docker image name matches: `ollama-mcp-server`
+4. Check VS Code Developer Tools:
    - `Help > Toggle Developer Tools`
    - Look for MCP-related errors in Console
-
-3. Verify MCP extension is installed and enabled:
+5. Verify MCP extension is installed and enabled:
    - `Extensions: Show Installed Extensions`
    - Look for MCP or Copilot extensions
 
-### Permission issues
+### Docker-specific issues
 
-If you get permission errors:
-```bash
-chmod +x /path/to/ollama-search/src/mcp_server.py
-```
+1. **Container exits immediately:**
+   - Check logs: `docker logs <container-id>`
+   - Test manually: `make docker-run`
+
+2. **Cannot connect to host Ollama:**
+   - Verify `host.docker.internal` is accessible
+   - On Linux, ensure `--add-host=host.docker.internal:host-gateway` is set
+   - Try using your host IP directly instead of `host.docker.internal`
+
+For more troubleshooting, see [DOCKER.md](./DOCKER.md).
 
 ## Advanced Configuration
 
-### Environment Variables
+### Environment Variables (Docker)
 
-Add environment variables to the MCP server:
+Add environment variables to the Docker MCP server:
+
+```json
+{
+  "mcp.servers": {
+    "ollama-search": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "OLLAMA_HOST=http://host.docker.internal:11434",
+        "-e",
+        "LOG_LEVEL=DEBUG",
+        "--add-host=host.docker.internal:host-gateway",
+        "ollama-mcp-server"
+      ]
+    }
+  }
+}
+```
+
+### Environment Variables (Python Direct)
+
+For local development without Docker:
 
 ```json
 {
@@ -170,25 +246,35 @@ Add environment variables to the MCP server:
 
 ### Custom Model Selection
 
-To use a different Ollama model, you can modify the intelligent search calls to specify the model parameter.
+To use a different Ollama model, you can modify the intelligent search calls to specify the model parameter when calling the tools.
 
 ### Multiple Instances
 
-Run different instances with different models:
+Run different instances with different models using Docker:
 
 ```json
 {
   "mcp.servers": {
     "ollama-search-mistral": {
-      "command": "python3",
-      "args": ["/absolute/path/to/ollama-search/src/mcp_server.py"]
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "OLLAMA_HOST=http://host.docker.internal:11434",
+        "--add-host=host.docker.internal:host-gateway",
+        "ollama-mcp-server"
+      ],
+      "description": "Ollama Search with Mistral"
     },
     "ollama-search-codellama": {
-      "command": "python3",
-      "args": ["/absolute/path/to/ollama-search/src/mcp_server.py"],
-      "env": {
-        "DEFAULT_MODEL": "codellama:34b"
-      }
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "OLLAMA_HOST=http://host.docker.internal:11434",
+        "-e", "DEFAULT_MODEL=codellama:34b",
+        "--add-host=host.docker.internal:host-gateway",
+        "ollama-mcp-server"
+      ],
+      "description": "Ollama Search with CodeLlama"
     }
   }
 }
@@ -196,14 +282,47 @@ Run different instances with different models:
 
 ## VS Code Tasks Integration
 
-Create `.vscode/tasks.json` to run the MCP server as a VS Code task:
+### Using Docker Compose (Recommended)
+
+Create or update `.vscode/tasks.json` to run the MCP server with Docker:
 
 ```json
 {
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Start Ollama MCP Server",
+      "label": "Start Ollama MCP Server (Docker)",
+      "type": "shell",
+      "command": "make",
+      "args": ["docker-up"],
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Stop Ollama MCP Server (Docker)",
+      "type": "shell",
+      "command": "make",
+      "args": ["docker-down"],
+      "problemMatcher": []
+    }
+  ]
+}
+```
+
+### Using Python Directly (Development)
+
+For local development:
+
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Ollama MCP Server (Python)",
       "type": "shell",
       "command": "python3",
       "args": [
@@ -225,8 +344,6 @@ Run with: `Terminal > Run Task... > Start Ollama MCP Server`
 ## VS Code Extension Development
 
 If you want to create a dedicated VS Code extension for this MCP server:
-
-1. **Extension Structure:**
    ```
    ollama-search-vscode/
    ├── package.json

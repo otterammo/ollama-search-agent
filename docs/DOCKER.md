@@ -91,29 +91,6 @@ docker run -it --rm \
 
 ## Using with MCP Clients
 
-### Claude Desktop Configuration
-
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
-
-```json
-{
-  "mcpServers": {
-    "ollama-search": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "OLLAMA_HOST=http://host.docker.internal:11434",
-        "--add-host=host.docker.internal:host-gateway",
-        "ollama-mcp-server"
-      ]
-    }
-  }
-}
-```
-
 ### VS Code Configuration
 
 Add to your VS Code settings.json:

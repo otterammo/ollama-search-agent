@@ -168,7 +168,7 @@ def main() -> None:
         print("Ollama Search MCP Server")
         print("\nUsage: ollama-mcp-server")
         print("\nThis is an MCP (Model Context Protocol) server that runs in stdio mode.")
-        print("It is designed to be launched by MCP clients (like Claude Desktop).")
+        print("It is designed to be launched by MCP clients (like VS Code Chat).")
         print("\nThe server exposes 3 tools:")
         print("  - ollama_web_search: Search the web using Ollama")
         print("  - ollama_web_fetch: Fetch content from a URL")

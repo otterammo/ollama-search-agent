@@ -77,67 +77,16 @@ python3 src/mcp_server.py
 
 ### MCP Client Configuration
 
-#### Claude Desktop
-
-**Local Installation:**
-
-Add to your MCP client configuration (e.g., Claude Desktop's config):
-
-```json
-{
-  "mcpServers": {
-    "ollama-search": {
-      "command": "python3",
-      "args": ["/absolute/path/to/ollama-search/src/mcp_server.py"]
-    }
-  }
-}
-```
-
-**Docker Installation:**
-
-```json
-{
-  "mcpServers": {
-    "ollama-search": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "-e",
-        "OLLAMA_HOST=http://host.docker.internal:11434",
-        "--add-host=host.docker.internal:host-gateway",
-        "ollama-mcp-server"
-      ]
-    }
-  }
-}
-```
-
 #### VS Code
 
 See [VSCODE_SETUP.md](VSCODE_SETUP.md) for detailed VS Code integration.
 
 **Local Installation:**
 
-Quick setup - add to VS Code settings.json:
+Quick setup - add to VS Code .vscode/mcp.json:
 ```json
 {
-  "mcp.servers": {
-    "ollama-search": {
-      "command": "python3",
-      "args": ["${workspaceFolder}/src/mcp_server.py"]
-    }
-  }
-}
-```
-
-**Docker Installation:**
-
-```json
-{
-  "mcp.servers": {
+  "servers": {
     "ollama-search": {
       "command": "docker",
       "args": [
