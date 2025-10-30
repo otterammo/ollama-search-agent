@@ -58,6 +58,17 @@ def main() -> int:
         help="Maximum length of tool results (default: 8000)",
     )
     parser.add_argument(
+        "--num-ctx",
+        type=int,
+        default=None,
+        help="Context window size in tokens (default: auto-detect maximum for model)",
+    )
+    parser.add_argument(
+        "--no-auto-detect",
+        action="store_true",
+        help="Disable automatic context size detection (uses 8192)",
+    )
+    parser.add_argument(
         "--thinking",
         action="store_true",
         help=(
@@ -92,6 +103,8 @@ def main() -> int:
         model=args.model,
         max_result_length=args.max_result_length,
         enable_thinking=args.thinking,
+        num_ctx=args.num_ctx,
+        auto_detect_context=not args.no_auto_detect,
     )
 
     try:

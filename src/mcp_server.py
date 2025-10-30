@@ -127,31 +127,50 @@ class OllamaSearchMCPServer:
         """Handle intelligent search tool calls.
 
         Args:
-            arguments: Tool arguments containing 'query', optional 'model' and 'verbose'
+            arguments: Tool arguments containing 'query', optional 'model', 'num_ctx' and 'verbose'
 
         Returns:
             List with single TextContent containing the search response
         """
         query = arguments.get("query", "")
         model = arguments.get("model", "mistral:7b-instruct")
+        num_ctx = arguments.get("num_ctx")
         verbose = arguments.get("verbose", False)
 
         if verbose:
-            logger.info("Executing intelligent search: %s (model: %s)", query, model)
+            logger.info(
+                "Executing intelligent search: %s (model: %s, num_ctx: %s)",
+                query,
+                model,
+                num_ctx if num_ctx else "auto",
+            )
+        
+        # Create a unique cache key for model + num_ctx combination
+        cache_key = f"{model}:{num_ctx}"
+        if cache_key not in self.agent_cache:
+            self.agent_cache[cache_key] = SearchAgent(
+                model=model,
+                num_ctx=num_ctx,
+            )
 
-        # Get or create agent for this model
-        if model not in self.agent_cache:
-            self.agent_cache[model] = SearchAgent(model=model)
-
-        agent = self.agent_cache[model]
+        agent = self.agent_cache[cache_key]
 
         try:
             # Run the search in a thread pool to avoid blocking
+            # Note: We disable verbose output to avoid polluting the MCP response
+            # The MCP server already logs at the INFO level
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(
-                None, agent.search, query, verbose
+                None, agent.search, query, False  # Always use verbose=False for MCP
             )
-            return [TextContent(type="text", text=response)]
+            
+            if response:
+                return [TextContent(type="text", text=response)]
+            else:
+                return [TextContent(
+                    type="text", 
+                    text="No results found. The search completed but returned no information."
+                )]
         except Exception as e:
             logger.error("Intelligent search failed: %s", str(e))
             return [TextContent(type="text", text=f"Error: {str(e)}")]
