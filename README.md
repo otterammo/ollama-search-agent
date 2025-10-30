@@ -2,6 +2,34 @@
 
 A search agent using Ollama's web search API for reading and understanding online documentation.
 
+## Prerequisites
+
+### Ollama API Key (Required)
+
+The web search and web fetch features require an Ollama API key. Follow these steps:
+
+1. **Get an API Key:**
+   - Visit [https://ollama.com](https://ollama.com)
+   - Sign up or log in to your account
+   - Generate an API key from your account settings
+
+2. **Configure the API Key:**
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env
+   
+   # Edit .env and add your API key
+   # OLLAMA_API_KEY=your-api-key-here
+   ```
+
+3. **Verify Setup:**
+   ```bash
+   # The API key will be automatically loaded from .env
+   python3 -c "import os; from dotenv import load_dotenv; load_dotenv(); print('API Key configured!' if os.getenv('OLLAMA_API_KEY') else 'API Key missing!')"
+   ```
+
+**Important:** The `.env` file is git-ignored to protect your API key. Never commit it to version control.
+
 ## Installation
 
 ### Local Installation
@@ -125,6 +153,44 @@ npx @modelcontextprotocol/inspector python3 src/mcp_server.py
 ```
 
 This will start the inspector (usually at `http://localhost:6274`) where you can interactively test all three tools. No installation required - `npx` runs it directly from the npm registry.
+
+## Troubleshooting
+
+### Authorization Error
+
+**Error:** `Authorization header with Bearer token is required for web search`
+
+**Solution:** 
+1. Ensure you have set up your `.env` file with your Ollama API key:
+   ```bash
+   cp .env.example .env
+   # Edit .env and add: OLLAMA_API_KEY=your-api-key-here
+   ```
+
+2. Verify the API key is loaded:
+   ```bash
+   python3 -c "import os; from dotenv import load_dotenv; load_dotenv(); print('✓ API Key configured' if os.getenv('OLLAMA_API_KEY') else '✗ API Key missing')"
+   ```
+
+3. For Docker/MCP integration, ensure the `-e OLLAMA_API_KEY=your-api-key-here` environment variable is passed to the container.
+
+### API Key Not Working
+
+**Problem:** You have the API key set but still get errors.
+
+**Solution:**
+1. Check if the API key is valid by visiting [https://ollama.com](https://ollama.com)
+2. Ensure there are no extra spaces or quotes in your `.env` file
+3. Restart any running processes to reload the environment variables
+
+### Connection Issues
+
+**Problem:** Cannot connect to Ollama server.
+
+**Solution:**
+1. Verify Ollama is running: `curl http://localhost:11434/api/tags`
+2. Check the `OLLAMA_HOST` variable in your `.env` file
+3. For Docker, ensure host networking is properly configured
 
 ## Development
 

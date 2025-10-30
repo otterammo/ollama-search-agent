@@ -8,7 +8,76 @@ Model Context Protocol (MCP) is a protocol that allows AI assistants (like VS Co
 
 - Docker and Docker Compose installed
 - Ollama running on your host machine (accessible at `http://localhost:11434`)
+- **Ollama API Key** - Required for web search functionality (see [Configuration](#configuration) below)
 - VS Code with GitHub Copilot extension (for VS Code integration)
+
+## Configuration
+
+### Ollama API Key
+
+The web search and web fetch features require an Ollama API key. This key is needed even for local installations as these features use Ollama's cloud service.
+
+#### Getting Your API Key
+
+1. Visit [https://ollama.com](https://ollama.com) and sign up or log in
+2. Navigate to your account settings to generate an API key
+3. Copy the API key for use in the next step
+
+#### Setting Up the API Key
+
+**For Local Development:**
+
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Edit `.env` and add your API key:
+   ```bash
+   OLLAMA_HOST=http://localhost:11434
+   OLLAMA_API_KEY=your-api-key-here
+   ```
+
+**For Docker:**
+
+Set the environment variable when running Docker:
+
+```bash
+docker run -i --rm \
+  -e OLLAMA_HOST=http://host.docker.internal:11434 \
+  -e OLLAMA_API_KEY=your-api-key-here \
+  --add-host=host.docker.internal:host-gateway \
+  ollama-mcp-server
+```
+
+Or update your `docker-compose.yml` to include the API key from your `.env` file (already configured).
+
+**For VS Code MCP Integration:**
+
+When configuring the MCP server in VS Code settings, add the API key as an environment variable:
+
+```json
+{
+  "mcp.servers": {
+    "ollama-search": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "OLLAMA_HOST=http://host.docker.internal:11434",
+        "-e",
+        "OLLAMA_API_KEY=your-api-key-here",
+        "--add-host=host.docker.internal:host-gateway",
+        "ollama-mcp-server"
+      ]
+    }
+  }
+}
+```
+
+**Important:** Never commit your `.env` file with your actual API key to version control. The `.env` file is already included in `.gitignore`.
 
 ## Quick Start
 

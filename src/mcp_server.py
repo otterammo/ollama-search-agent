@@ -2,8 +2,11 @@
 
 import asyncio
 import logging
+import os
+from pathlib import Path
 from typing import Any
 
+from dotenv import load_dotenv
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp.types import TextContent, Tool
@@ -11,6 +14,11 @@ from ollama import web_fetch, web_search
 
 from .mcp_tools import get_all_tools
 from .search_agent import SearchAgent
+
+# Load environment variables from .env file
+env_file = Path(__file__).parent.parent / ".env"
+if env_file.exists():
+    load_dotenv(env_file)
 
 logger = logging.getLogger(__name__)
 

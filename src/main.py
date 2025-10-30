@@ -3,11 +3,18 @@
 import argparse
 import logging
 import sys
+from pathlib import Path
 from typing import Any
 
+from dotenv import load_dotenv
 from ollama._types import Message
 
 from .search_agent import SearchAgent
+
+# Load environment variables from .env file
+env_file = Path(__file__).parent.parent / ".env"
+if env_file.exists():
+    load_dotenv(env_file)
 
 
 def setup_logging(verbose: bool = False) -> None:

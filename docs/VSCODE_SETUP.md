@@ -8,8 +8,20 @@ VS Code can connect to MCP servers through the GitHub Copilot extension (with MC
 
 - Docker and Docker Compose installed
 - Ollama running on your host machine
+- **Ollama API Key** - Required for web search functionality ([Get your API key](https://ollama.com))
 - VS Code with GitHub Copilot extension (or other MCP-compatible extension)
 - MCP server Docker image built (`make docker-build`)
+
+## Configuration
+
+### Ollama API Key Setup
+
+Before setting up VS Code integration, ensure you have your Ollama API key:
+
+1. **Get your API key** from [https://ollama.com](https://ollama.com)
+2. **Keep it handy** - you'll need to add it to the VS Code MCP configuration
+
+⚠️ **Security Note:** Your API key will be stored in VS Code settings. Consider using workspace-specific settings (`.vscode/settings.json`) for project-specific keys, and add this file to `.gitignore` if it contains sensitive information.
 
 ## Setup for VS Code
 
@@ -25,7 +37,7 @@ VS Code can connect to MCP servers through the GitHub Copilot extension (with MC
    - Type "Preferences: Open User Settings (JSON)"
    - Press Enter
 
-3. Add the MCP server configuration:
+3. Add the MCP server configuration **with your API key**:
 
 ```json
 {
@@ -38,6 +50,8 @@ VS Code can connect to MCP servers through the GitHub Copilot extension (with MC
         "--rm",
         "-e",
         "OLLAMA_HOST=http://host.docker.internal:11434",
+        "-e",
+        "OLLAMA_API_KEY=your-api-key-here",
         "--add-host=host.docker.internal:host-gateway",
         "ollama-mcp-server"
       ],
@@ -47,9 +61,19 @@ VS Code can connect to MCP servers through the GitHub Copilot extension (with MC
 }
 ```
 
+**Important:** Replace `your-api-key-here` with your actual Ollama API key.
+
 ### Option 2: Using Python Directly (Development)
 
 For local development without Docker:
+
+1. Ensure your `.env` file has the API key:
+   ```bash
+   OLLAMA_API_KEY=your-api-key-here
+   OLLAMA_HOST=http://localhost:11434
+   ```
+
+2. Add to VS Code settings:
 
 ```json
 {
@@ -59,12 +83,17 @@ For local development without Docker:
       "args": [
         "/absolute/path/to/ollama-search/src/mcp_server.py"
       ],
-      "env": {},
+      "env": {
+        "OLLAMA_API_KEY": "your-api-key-here"
+      },
       "description": "Ollama web search and fetch capabilities (local dev)"
     }
   }
 }
 ```
+
+**Note:** The Python option can also read from the `.env` file in the project root, so you can omit the `env` section if you have `.env` configured.
+
 ### Option 3: Workspace Settings (Docker)
 
 For project-specific configuration, create `.vscode/settings.json` in your workspace:
@@ -78,6 +107,10 @@ For project-specific configuration, create `.vscode/settings.json` in your works
         "run",
         "-i",
         "--rm",
+        "-e",
+        "OLLAMA_HOST=http://host.docker.internal:11434",
+        "-e",
+        "OLLAMA_API_KEY=your-api-key-here",
         "-e",
         "OLLAMA_HOST=http://host.docker.internal:11434",
         "--add-host=host.docker.internal:host-gateway",
